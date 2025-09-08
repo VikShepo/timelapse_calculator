@@ -1,2 +1,1 @@
-# timelapse_calculator
-Timelapse Calculator (Mobile app)
+# Timelapse Calculator (Mobile app)
