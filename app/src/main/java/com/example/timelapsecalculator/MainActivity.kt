@@ -54,10 +54,16 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.material3.IconButton
+import androidx.compose.ui.draw.rotate
 
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,6 +101,13 @@ fun TimelapseScreen() {
 	var resultPhotos by remember { mutableStateOf("") }
 	var resultStorage by remember { mutableStateOf("") }
 	var errorMessage by remember { mutableStateOf("") }
+
+	var settingsExpanded by remember { mutableStateOf(false) }
+	val gearRotation by animateFloatAsState(
+		targetValue = if (settingsExpanded) 90f else 0f,
+		animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+		label = "gearRotation"
+	)
 
 	fun computeError(): String {
 		fun isTripleEmpty(h: String, m: String, s: String): Boolean {
@@ -152,15 +165,65 @@ fun TimelapseScreen() {
 				textAlign = TextAlign.Start
 			)
 			IconButton(
-				onClick = { },
+				onClick = { settingsExpanded = !settingsExpanded },
 				modifier = Modifier.align(Alignment.CenterEnd)
 			) {
 				androidx.compose.material3.Icon(
 					Icons.Filled.Settings,
 					contentDescription = "Einstellungen",
-					modifier = Modifier.size(28.dp),
+					modifier = Modifier.size(28.dp).rotate(gearRotation),
 					tint = Color(0xFF5E46A3)
 				)
+			}
+		}
+		androidx.compose.animation.AnimatedVisibility(
+			visible = settingsExpanded,
+			enter = expandVertically(
+				animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+				expandFrom = Alignment.Top
+			) + fadeIn(),
+			exit = shrinkVertically(
+				animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+				shrinkTowards = Alignment.Top
+			) + fadeOut()
+		) {
+			Column(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(top = 12.dp)
+					.clip(RoundedCornerShape(16.dp))
+					.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
+					.background(Color.White)
+			) {
+				Row(
+					modifier = Modifier
+						.fillMaxWidth()
+						.clickable { /* TODO: theme toggle action */ }
+						.padding(horizontal = 16.dp, vertical = 14.dp),
+					verticalAlignment = Alignment.CenterVertically
+				) {
+					Text("Dunkel-Modus/Heller-Modus", color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+				}
+				Divider()
+				Row(
+					modifier = Modifier
+						.fillMaxWidth()
+						.clickable { /* TODO: language action */ }
+						.padding(horizontal = 16.dp, vertical = 14.dp),
+					verticalAlignment = Alignment.CenterVertically
+				) {
+					Text("Sprache", color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+				}
+				Divider()
+				Row(
+					modifier = Modifier
+						.fillMaxWidth()
+						.clickable { /* TODO: about action */ }
+						.padding(horizontal = 16.dp, vertical = 14.dp),
+					verticalAlignment = Alignment.CenterVertically
+				) {
+					Text("Über", color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+				}
 			}
 		}
 		Spacer(Modifier.height(24.dp))
