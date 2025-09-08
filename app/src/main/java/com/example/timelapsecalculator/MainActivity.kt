@@ -64,6 +64,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.focus.onFocusChanged
 
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -108,6 +109,10 @@ fun TimelapseScreen() {
 		animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
 		label = "gearRotation"
 	)
+
+	fun closeDropdown() {
+		if (settingsExpanded) settingsExpanded = false
+	}
 
 	fun computeError(): String {
 		fun isTripleEmpty(h: String, m: String, s: String): Boolean {
@@ -190,7 +195,6 @@ fun TimelapseScreen() {
 			Column(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(top = 12.dp)
 					.clip(RoundedCornerShape(16.dp))
 					.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
 					.background(Color.White)
@@ -248,7 +252,7 @@ fun TimelapseScreen() {
 							.weight(1f)
 							.fillMaxHeight()
 							.background(if (selected) Color(0xFFE9DDFB) else Color.Transparent)
-							.clickable { selectedTab = mode; errorMessage = "" }
+							.clickable { closeDropdown(); selectedTab = mode; errorMessage = "" }
 					) {
 						androidx.compose.animation.AnimatedVisibility(
 							visible = selected,
@@ -294,22 +298,22 @@ fun TimelapseScreen() {
 
 		OutlinedTextField(
 			value = fps,
-			onValueChange = { fps = it.filter { c -> c.isDigit() } },
+			onValueChange = { closeDropdown(); fps = it.filter { c -> c.isDigit() } },
 			label = { Text("FPS (Frames pro Sekunde)") },
 			singleLine = true,
 			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-			modifier = Modifier.fillMaxWidth(),
+			modifier = Modifier.fillMaxWidth().onFocusChanged { if (it.isFocused) closeDropdown() },
 			colors = OutlinedTextFieldDefaults.colors()
 		)
 
 		Spacer(Modifier.height(12.dp))
 		OutlinedTextField(
 			value = sizeMb,
-			onValueChange = { sizeMb = it.filter { ch -> ch.isDigit() || ch == '.' || ch == ',' } },
+			onValueChange = { closeDropdown(); sizeMb = it.filter { ch -> ch.isDigit() || ch == '.' || ch == ',' } },
 			label = { Text("Bildgröße pro Foto (MB)") },
 			singleLine = true,
 			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-			modifier = Modifier.fillMaxWidth()
+			modifier = Modifier.fillMaxWidth().onFocusChanged { if (it.isFocused) closeDropdown() }
 		)
 
 		Spacer(Modifier.height(16.dp))
@@ -321,9 +325,10 @@ fun TimelapseScreen() {
 					hText = videoH,
 					mText = videoM,
 					sText = videoS,
-					onHChange = { videoH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
-					onMChange = { videoM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
-					onSChange = { videoS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onHChange = { closeDropdown(); videoH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onMChange = { closeDropdown(); videoM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onSChange = { closeDropdown(); videoS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onAnyFocus = { closeDropdown() },
 				)
 				Spacer(Modifier.height(12.dp))
 				TimeInputRow(
@@ -331,9 +336,10 @@ fun TimelapseScreen() {
 					hText = shootH,
 					mText = shootM,
 					sText = shootS,
-					onHChange = { shootH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
-					onMChange = { shootM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
-					onSChange = { shootS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onHChange = { closeDropdown(); shootH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onMChange = { closeDropdown(); shootM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onSChange = { closeDropdown(); shootS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onAnyFocus = { closeDropdown() },
 				)
 			}
 			Mode.Video -> {
@@ -342,9 +348,10 @@ fun TimelapseScreen() {
 					hText = intervalH,
 					mText = intervalM,
 					sText = intervalS,
-					onHChange = { intervalH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
-					onMChange = { intervalM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
-					onSChange = { intervalS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onHChange = { closeDropdown(); intervalH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onMChange = { closeDropdown(); intervalM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onSChange = { closeDropdown(); intervalS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onAnyFocus = { closeDropdown() },
 				)
 				Spacer(Modifier.height(12.dp))
 				TimeInputRow(
@@ -352,9 +359,10 @@ fun TimelapseScreen() {
 					hText = shootH,
 					mText = shootM,
 					sText = shootS,
-					onHChange = { shootH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
-					onMChange = { shootM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
-					onSChange = { shootS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onHChange = { closeDropdown(); shootH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onMChange = { closeDropdown(); shootM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onSChange = { closeDropdown(); shootS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onAnyFocus = { closeDropdown() },
 				)
 			}
 			Mode.Shoot -> {
@@ -363,9 +371,10 @@ fun TimelapseScreen() {
 					hText = intervalH,
 					mText = intervalM,
 					sText = intervalS,
-					onHChange = { intervalH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
-					onMChange = { intervalM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
-					onSChange = { intervalS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onHChange = { closeDropdown(); intervalH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onMChange = { closeDropdown(); intervalM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onSChange = { closeDropdown(); intervalS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onAnyFocus = { closeDropdown() },
 				)
 				Spacer(Modifier.height(12.dp))
 				TimeInputRow(
@@ -373,9 +382,10 @@ fun TimelapseScreen() {
 					hText = videoH,
 					mText = videoM,
 					sText = videoS,
-					onHChange = { videoH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
-					onMChange = { videoM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
-					onSChange = { videoS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onHChange = { closeDropdown(); videoH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onMChange = { closeDropdown(); videoM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onSChange = { closeDropdown(); videoS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onAnyFocus = { closeDropdown() },
 				)
 			}
 		}
@@ -514,14 +524,15 @@ private fun TimeInputRow(
 	onHChange: (String) -> Unit,
 	onMChange: (String) -> Unit,
 	onSChange: (String) -> Unit,
+	onAnyFocus: () -> Unit = {},
 ) {
 	Column(modifier = Modifier.fillMaxWidth()) {
 		Text(label)
 		Spacer(Modifier.height(6.dp))
 		Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-			UnitField(value = hText, onChange = onHChange, placeholder = "hh", unit = "h", modifier = Modifier.weight(1f))
-			UnitField(value = mText, onChange = onMChange, placeholder = "mm", unit = "min", modifier = Modifier.weight(1f))
-			UnitField(value = sText, onChange = onSChange, placeholder = "ss", unit = "s", modifier = Modifier.weight(1f))
+			UnitField(value = hText, onChange = onHChange, placeholder = "hh", unit = "h", modifier = Modifier.weight(1f), onFocus = onAnyFocus)
+			UnitField(value = mText, onChange = onMChange, placeholder = "mm", unit = "min", modifier = Modifier.weight(1f), onFocus = onAnyFocus)
+			UnitField(value = sText, onChange = onSChange, placeholder = "ss", unit = "s", modifier = Modifier.weight(1f), onFocus = onAnyFocus)
 		}
 	}
 }
@@ -532,7 +543,8 @@ private fun UnitField(
 	onChange: (String) -> Unit,
 	placeholder: String,
 	unit: String,
-	modifier: Modifier = Modifier
+	modifier: Modifier = Modifier,
+	onFocus: () -> Unit = {},
 ) {
 	Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
 		OutlinedTextField(
@@ -540,7 +552,7 @@ private fun UnitField(
 			onValueChange = { text -> onChange(text.filter { c -> c.isDigit() }) },
 			singleLine = true,
 			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-			modifier = Modifier.weight(1f),
+			modifier = Modifier.weight(1f).onFocusChanged { if (it.isFocused) onFocus() },
 			placeholder = { Text(placeholder) }
 		)
 		Spacer(Modifier.width(6.dp))
