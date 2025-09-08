@@ -76,8 +76,8 @@ private enum class Mode(val title: String) { Interval("Intervall"), Video("Video
 @Composable
 fun TimelapseScreen() {
 	var selectedTab by remember { mutableStateOf(Mode.Interval) }
-	var fps by remember { mutableStateOf("30") }
-	var sizeMb by remember { mutableStateOf("5") }
+	var fps by remember { mutableStateOf("") }
+	var sizeMb by remember { mutableStateOf("") }
 	// Split time inputs into hours/minutes/seconds
 	var intervalH by remember { mutableStateOf("") }
 	var intervalM by remember { mutableStateOf("") }
@@ -320,8 +320,12 @@ fun TimelapseScreen() {
 					return normalized.toDoubleOrNull() ?: Double.NaN
 				}
 
-				val fpsVal = parseDecimal(fps)
-				val sizeVal = parseDecimal(sizeMb)
+				val parsedFps = parseDecimal(fps)
+				val fpsProvided = !parsedFps.isNaN()
+				val fpsEffective = if (fpsProvided) parsedFps else 30.0
+				val parsedSize = parseDecimal(sizeMb)
+				val sizeProvided = !parsedSize.isNaN()
+				val sizeVal = if (sizeProvided) parsedSize else Double.NaN
 				fun tripleToSeconds(h: String, m: String, s: String): Double {
 					val hh = h.toDoubleOrNull() ?: 0.0
 					val mm = m.toDoubleOrNull() ?: 0.0
@@ -341,51 +345,60 @@ fun TimelapseScreen() {
 				var video = tripleToSeconds(videoH, videoM, videoS)
 				var shoot = tripleToSeconds(shootH, shootM, shootS)
 
-				if (fpsVal.isNaN() || sizeVal.isNaN()) {
-					resultPrimary = ""
-					resultPhotos = ""
-					resultStorage = ""
-					return@Button
-				}
+				// Reset optional results; set them conditionally below
+				resultPhotos = ""
+				resultStorage = ""
 
 				when (selectedTab) {
 					Mode.Interval -> {
-						if (!video.isNaN() && !shoot.isNaN() && fpsVal > 0) {
-							val frames = (video * fpsVal)
+						if (!video.isNaN() && !shoot.isNaN() && fpsEffective > 0) {
+							val frames = (video * fpsEffective)
 							interval = if (frames > 0) shoot / frames else Double.NaN
 							val (ih, im, isec) = secondsToTriple(interval)
 							intervalH = ih; intervalM = im; intervalS = isec
 							val photos = frames.toInt()
-							val storage = photos * sizeVal
 							resultPrimary = "Intervall (Sek.): ${interval.formatGermanShort()}"
-							resultPhotos = "Anzahl Fotos: ${photos}"
-							resultStorage = "Speichergröße: ${storage.formatMb()} MB"
+							if (fpsProvided) {
+								resultPhotos = "Anzahl Fotos: ${photos}"
+							}
+							if (sizeProvided && !sizeVal.isNaN()) {
+								val storage = photos * sizeVal
+								resultStorage = "Speichergröße: ${storage.formatMb()} MB"
+							}
 						}
 					}
 					Mode.Video -> {
-						if (!interval.isNaN() && !shoot.isNaN() && fpsVal > 0) {
+						if (!interval.isNaN() && !shoot.isNaN() && fpsEffective > 0) {
 							val frames = (shoot / interval)
-							video = if (fpsVal > 0) frames / fpsVal else Double.NaN
+							video = frames / fpsEffective
 							val (vh, vm, vs) = secondsToTriple(video)
 							videoH = vh; videoM = vm; videoS = vs
 							val photos = frames.toInt()
-							val storage = photos * sizeVal
 							resultPrimary = "Videodauer (Sek.): ${video.formatGermanShort()}"
-							resultPhotos = "Anzahl Fotos: ${photos}"
-							resultStorage = "Speichergröße: ${storage.formatMb()} MB"
+							if (fpsProvided) {
+								resultPhotos = "Anzahl Fotos: ${photos}"
+							}
+							if (sizeProvided && !sizeVal.isNaN()) {
+								val storage = photos * sizeVal
+								resultStorage = "Speichergröße: ${storage.formatMb()} MB"
+							}
 						}
 					}
 					Mode.Shoot -> {
-						if (!interval.isNaN() && !video.isNaN() && fpsVal > 0) {
-							val frames = (video * fpsVal)
+						if (!interval.isNaN() && !video.isNaN() && fpsEffective > 0) {
+							val frames = (video * fpsEffective)
 							shoot = frames * interval
 							val (sh, sm, ss) = secondsToTriple(shoot)
 							shootH = sh; shootM = sm; shootS = ss
 							val photos = frames.toInt()
-							val storage = photos * sizeVal
 							resultPrimary = "Drehzeit (Sek.): ${shoot.formatGermanShort()}"
-							resultPhotos = "Anzahl Fotos: ${photos}"
-							resultStorage = "Speichergröße: ${storage.formatMb()} MB"
+							if (fpsProvided) {
+								resultPhotos = "Anzahl Fotos: ${photos}"
+							}
+							if (sizeProvided && !sizeVal.isNaN()) {
+								val storage = photos * sizeVal
+								resultStorage = "Speichergröße: ${storage.formatMb()} MB"
+							}
 						}
 					}
 				}
@@ -400,10 +413,14 @@ fun TimelapseScreen() {
 		Spacer(Modifier.height(24.dp))
 		if (resultPrimary.isNotBlank()) {
 			Text(resultPrimary, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
-			Spacer(Modifier.height(12.dp))
-			Text(resultPhotos, fontSize = 18.sp)
-			Spacer(Modifier.height(8.dp))
-			Text(resultStorage, fontSize = 18.sp)
+			if (resultPhotos.isNotBlank()) {
+				Spacer(Modifier.height(12.dp))
+				Text(resultPhotos, fontSize = 18.sp)
+			}
+			if (resultStorage.isNotBlank()) {
+				Spacer(Modifier.height(8.dp))
+				Text(resultStorage, fontSize = 18.sp)
+			}
 		}
 	}
 }
