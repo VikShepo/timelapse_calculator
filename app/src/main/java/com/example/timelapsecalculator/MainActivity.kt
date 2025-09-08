@@ -78,9 +78,16 @@ fun TimelapseScreen() {
 	var selectedTab by remember { mutableStateOf(Mode.Interval) }
 	var fps by remember { mutableStateOf("30") }
 	var sizeMb by remember { mutableStateOf("5") }
-	var intervalSec by remember { mutableStateOf("") }
-	var videoSec by remember { mutableStateOf("") }
-	var shootSec by remember { mutableStateOf("") }
+	// Split time inputs into hours/minutes/seconds
+	var intervalH by remember { mutableStateOf("") }
+	var intervalM by remember { mutableStateOf("") }
+	var intervalS by remember { mutableStateOf("") }
+	var videoH by remember { mutableStateOf("") }
+	var videoM by remember { mutableStateOf("") }
+	var videoS by remember { mutableStateOf("") }
+	var shootH by remember { mutableStateOf("") }
+	var shootM by remember { mutableStateOf("") }
+	var shootS by remember { mutableStateOf("") }
 
 	var resultPrimary by remember { mutableStateOf("") }
 	var resultPhotos by remember { mutableStateOf("") }
@@ -88,10 +95,13 @@ fun TimelapseScreen() {
 	var errorMessage by remember { mutableStateOf("") }
 
 	fun computeError(): String {
+		fun isTripleEmpty(h: String, m: String, s: String): Boolean {
+			return h.isBlank() && m.isBlank() && s.isBlank()
+		}
 		return when (selectedTab) {
 			Mode.Interval -> {
-				val missingVideo = videoSec.isBlank()
-				val missingShoot = shootSec.isBlank()
+				val missingVideo = isTripleEmpty(videoH, videoM, videoS)
+				val missingShoot = isTripleEmpty(shootH, shootM, shootS)
 				when {
 					missingVideo && missingShoot -> "Bitte Videodauer und Drehzeit eingeben."
 					missingVideo -> "Bitte Videodauer eingeben."
@@ -100,8 +110,8 @@ fun TimelapseScreen() {
 				}
 			}
 			Mode.Video -> {
-				val missingInterval = intervalSec.isBlank()
-				val missingShoot = shootSec.isBlank()
+				val missingInterval = isTripleEmpty(intervalH, intervalM, intervalS)
+				val missingShoot = isTripleEmpty(shootH, shootM, shootS)
 				when {
 					missingInterval && missingShoot -> "Bitte Intervall und Drehzeit eingeben."
 					missingInterval -> "Bitte Intervall eingeben."
@@ -110,8 +120,8 @@ fun TimelapseScreen() {
 				}
 			}
 			Mode.Shoot -> {
-				val missingInterval = intervalSec.isBlank()
-				val missingVideo = videoSec.isBlank()
+				val missingInterval = isTripleEmpty(intervalH, intervalM, intervalS)
+				val missingVideo = isTripleEmpty(videoH, videoM, videoS)
 				when {
 					missingInterval && missingVideo -> "Bitte Intervall und Videodauer eingeben."
 					missingInterval -> "Bitte Intervall eingeben."
@@ -226,78 +236,66 @@ fun TimelapseScreen() {
 
 		when (selectedTab) {
 			Mode.Interval -> {
-				OutlinedTextField(
-					value = videoSec,
-					onValueChange = {
-						videoSec = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
-						errorMessage = computeError()
-					},
-					label = { Text("Videodauer (Sekunden)") },
-					singleLine = true,
-					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-					modifier = Modifier.fillMaxWidth()
+				TimeInputRow(
+					label = "Videodauer",
+					hText = videoH,
+					mText = videoM,
+					sText = videoS,
+					onHChange = { videoH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onMChange = { videoM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onSChange = { videoS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 				)
 				Spacer(Modifier.height(12.dp))
-				OutlinedTextField(
-					value = shootSec,
-					onValueChange = {
-						shootSec = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
-						errorMessage = computeError()
-					},
-					label = { Text("Drehzeit (Sekunden)") },
-					singleLine = true,
-					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-					modifier = Modifier.fillMaxWidth()
+				TimeInputRow(
+					label = "Drehzeit",
+					hText = shootH,
+					mText = shootM,
+					sText = shootS,
+					onHChange = { shootH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onMChange = { shootM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onSChange = { shootS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 				)
 			}
 			Mode.Video -> {
-				OutlinedTextField(
-					value = intervalSec,
-					onValueChange = {
-						intervalSec = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
-						errorMessage = computeError()
-					},
-					label = { Text("Intervall (Sekunden)") },
-					singleLine = true,
-					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-					modifier = Modifier.fillMaxWidth()
+				TimeInputRow(
+					label = "Intervall",
+					hText = intervalH,
+					mText = intervalM,
+					sText = intervalS,
+					onHChange = { intervalH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onMChange = { intervalM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onSChange = { intervalS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 				)
 				Spacer(Modifier.height(12.dp))
-				OutlinedTextField(
-					value = shootSec,
-					onValueChange = {
-						shootSec = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
-						errorMessage = computeError()
-					},
-					label = { Text("Drehzeit (Sekunden)") },
-					singleLine = true,
-					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-					modifier = Modifier.fillMaxWidth()
+				TimeInputRow(
+					label = "Drehzeit",
+					hText = shootH,
+					mText = shootM,
+					sText = shootS,
+					onHChange = { shootH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onMChange = { shootM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onSChange = { shootS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 				)
 			}
 			Mode.Shoot -> {
-				OutlinedTextField(
-					value = intervalSec,
-					onValueChange = {
-						intervalSec = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
-						errorMessage = computeError()
-					},
-					label = { Text("Intervall (Sekunden)") },
-					singleLine = true,
-					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-					modifier = Modifier.fillMaxWidth()
+				TimeInputRow(
+					label = "Intervall",
+					hText = intervalH,
+					mText = intervalM,
+					sText = intervalS,
+					onHChange = { intervalH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onMChange = { intervalM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onSChange = { intervalS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 				)
 				Spacer(Modifier.height(12.dp))
-				OutlinedTextField(
-					value = videoSec,
-					onValueChange = {
-						videoSec = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
-						errorMessage = computeError()
-					},
-					label = { Text("Videodauer (Sekunden)") },
-					singleLine = true,
-					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-					modifier = Modifier.fillMaxWidth()
+				TimeInputRow(
+					label = "Videodauer",
+					hText = videoH,
+					mText = videoM,
+					sText = videoS,
+					onHChange = { videoH = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onMChange = { videoM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
+					onSChange = { videoS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 				)
 			}
 		}
@@ -324,9 +322,24 @@ fun TimelapseScreen() {
 
 				val fpsVal = parseDecimal(fps)
 				val sizeVal = parseDecimal(sizeMb)
-				var interval = parseDecimal(intervalSec)
-				var video = parseDecimal(videoSec)
-				var shoot = parseDecimal(shootSec)
+				fun tripleToSeconds(h: String, m: String, s: String): Double {
+					val hh = h.toDoubleOrNull() ?: 0.0
+					val mm = m.toDoubleOrNull() ?: 0.0
+					val ss = s.toDoubleOrNull() ?: 0.0
+					return hh * 3600.0 + mm * 60.0 + ss
+				}
+				fun secondsToTriple(totalSeconds: Double): Triple<String,String,String> {
+					if (totalSeconds.isNaN() || totalSeconds < 0) return Triple("","","")
+					val total = totalSeconds.toLong()
+					val hh = total / 3600
+					val rem = total % 3600
+					val mm = rem / 60
+					val ss = rem % 60
+					return Triple(hh.toString(), mm.toString(), ss.toString())
+				}
+				var interval = tripleToSeconds(intervalH, intervalM, intervalS)
+				var video = tripleToSeconds(videoH, videoM, videoS)
+				var shoot = tripleToSeconds(shootH, shootM, shootS)
 
 				if (fpsVal.isNaN() || sizeVal.isNaN()) {
 					resultPrimary = ""
@@ -340,7 +353,8 @@ fun TimelapseScreen() {
 						if (!video.isNaN() && !shoot.isNaN() && fpsVal > 0) {
 							val frames = (video * fpsVal)
 							interval = if (frames > 0) shoot / frames else Double.NaN
-							intervalSec = interval.formatGerman()
+							val (ih, im, isec) = secondsToTriple(interval)
+							intervalH = ih; intervalM = im; intervalS = isec
 							val photos = frames.toInt()
 							val storage = photos * sizeVal
 							resultPrimary = "Intervall (Sek.): ${interval.formatGermanShort()}"
@@ -352,7 +366,8 @@ fun TimelapseScreen() {
 						if (!interval.isNaN() && !shoot.isNaN() && fpsVal > 0) {
 							val frames = (shoot / interval)
 							video = if (fpsVal > 0) frames / fpsVal else Double.NaN
-							videoSec = video.formatGerman()
+							val (vh, vm, vs) = secondsToTriple(video)
+							videoH = vh; videoM = vm; videoS = vs
 							val photos = frames.toInt()
 							val storage = photos * sizeVal
 							resultPrimary = "Videodauer (Sek.): ${video.formatGermanShort()}"
@@ -364,7 +379,8 @@ fun TimelapseScreen() {
 						if (!interval.isNaN() && !video.isNaN() && fpsVal > 0) {
 							val frames = (video * fpsVal)
 							shoot = frames * interval
-							shootSec = shoot.formatGerman()
+							val (sh, sm, ss) = secondsToTriple(shoot)
+							shootH = sh; shootM = sm; shootS = ss
 							val photos = frames.toInt()
 							val storage = photos * sizeVal
 							resultPrimary = "Drehzeit (Sek.): ${shoot.formatGermanShort()}"
@@ -389,6 +405,49 @@ fun TimelapseScreen() {
 			Spacer(Modifier.height(8.dp))
 			Text(resultStorage, fontSize = 18.sp)
 		}
+	}
+}
+
+@Composable
+private fun TimeInputRow(
+	label: String,
+	hText: String,
+	mText: String,
+	sText: String,
+	onHChange: (String) -> Unit,
+	onMChange: (String) -> Unit,
+	onSChange: (String) -> Unit,
+) {
+	Column(modifier = Modifier.fillMaxWidth()) {
+		Text(label)
+		Spacer(Modifier.height(6.dp))
+		Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+			UnitField(value = hText, onChange = onHChange, placeholder = "hh", unit = "h", modifier = Modifier.weight(1f))
+			UnitField(value = mText, onChange = onMChange, placeholder = "mm", unit = "min", modifier = Modifier.weight(1f))
+			UnitField(value = sText, onChange = onSChange, placeholder = "ss", unit = "s", modifier = Modifier.weight(1f))
+		}
+	}
+}
+
+@Composable
+private fun UnitField(
+	value: String,
+	onChange: (String) -> Unit,
+	placeholder: String,
+	unit: String,
+	modifier: Modifier = Modifier
+) {
+	Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+		OutlinedTextField(
+			value = value,
+			onValueChange = { text -> onChange(text.filter { c -> c.isDigit() }) },
+			singleLine = true,
+			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+			modifier = Modifier.weight(1f),
+			placeholder = { Text(placeholder) }
+		)
+		Spacer(Modifier.width(6.dp))
+		Text(unit)
 	}
 }
 
