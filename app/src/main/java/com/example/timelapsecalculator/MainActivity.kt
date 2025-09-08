@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import java.util.Locale
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -56,6 +57,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.material3.IconButton
 
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -139,13 +141,28 @@ fun TimelapseScreen() {
 		horizontalAlignment = Alignment.Start,
 		verticalArrangement = Arrangement.Top
 	) {
-		Text(
-			"Timelapse Rechner",
-			fontSize = 34.sp,
-			fontWeight = FontWeight.Bold,
-			modifier = Modifier.fillMaxWidth(),
-			textAlign = TextAlign.Center
-		)
+		Box(modifier = Modifier.fillMaxWidth()) {
+			Text(
+				"Timelapse Rechner",
+				fontSize = 34.sp,
+				fontWeight = FontWeight.Bold,
+				modifier = Modifier
+					.align(Alignment.CenterStart)
+					.fillMaxWidth(),
+				textAlign = TextAlign.Start
+			)
+			IconButton(
+				onClick = { },
+				modifier = Modifier.align(Alignment.CenterEnd)
+			) {
+				androidx.compose.material3.Icon(
+					Icons.Filled.Settings,
+					contentDescription = "Einstellungen",
+					modifier = Modifier.size(28.dp),
+					tint = Color(0xFF5E46A3)
+				)
+			}
+		}
 		Spacer(Modifier.height(24.dp))
 
 		Box(
