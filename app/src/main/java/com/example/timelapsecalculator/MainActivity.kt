@@ -321,7 +321,7 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 
 						Text(
 							mode.title,
-							color = MaterialTheme.colorScheme.onSurface,
+							color = if (selected) Color.Black else MaterialTheme.colorScheme.onSurface,
 							fontSize = 12.sp,
 							fontWeight = FontWeight.SemiBold,
 							maxLines = 1,
