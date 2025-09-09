@@ -23,7 +23,7 @@ import androidx.compose.foundation.border
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -281,7 +281,7 @@ fun TimelapseScreen(
 						)
 					}
 				}
-				Divider()
+				HorizontalDivider()
 				Row(
 					modifier = Modifier
 						.fillMaxWidth()
@@ -291,7 +291,7 @@ fun TimelapseScreen(
 				) {
 					Text("Sprache", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
 				}
-				Divider()
+				HorizontalDivider()
 				Row(
 					modifier = Modifier
 						.fillMaxWidth()
