@@ -233,7 +233,7 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 						.padding(horizontal = 16.dp, vertical = 14.dp),
 					verticalAlignment = Alignment.CenterVertically
 				) {
-					val modeText = if (isDarkMode) "Dunkel Modus" else "Heller Modus"
+					val modeText = if (isDarkMode) "Heller Modus" else "Dunkler Modus"
 					Text(
 						modeText,
 						color = MaterialTheme.colorScheme.onSurface,
