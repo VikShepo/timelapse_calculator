@@ -214,16 +214,21 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 			) + fadeIn(),
 			exit = shrinkVertically(
 				animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
-				shrinkTowards = Alignment.Top
+				shrinkTowards = Alignment.CenterVertically
 			) + fadeOut()
 		) {
 			Column(
 				modifier = Modifier
 					.fillMaxWidth()
-					.clip(RoundedCornerShape(16.dp))
-					.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
-					.background(MaterialTheme.colorScheme.surface)
+					.padding(vertical = 24.dp)
 			) {
+				Column(
+					modifier = Modifier
+						.fillMaxWidth()
+						.clip(RoundedCornerShape(16.dp))
+						.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
+						.background(MaterialTheme.colorScheme.surface)
+				) {
 				Row(
 					modifier = Modifier
 						.fillMaxWidth()
@@ -278,9 +283,13 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 				) {
 					Text("Über", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
 				}
+				}
 			}
 		}
-		Spacer(Modifier.height(24.dp))
+		// keep uniform spacing only when dropdown is collapsed
+		if (!settingsExpanded) {
+			Spacer(Modifier.height(24.dp))
+		}
 
 		Box(
 			modifier = Modifier
