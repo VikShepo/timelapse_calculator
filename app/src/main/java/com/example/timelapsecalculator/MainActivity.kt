@@ -59,6 +59,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -67,8 +68,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.runtime.LaunchedEffect
-import kotlinx.coroutines.delay
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
 
@@ -220,17 +224,10 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 					.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
 					.background(MaterialTheme.colorScheme.surface)
 			) {
-				var bulbPop by remember { mutableStateOf(false) }
-				val bulbScale by animateFloatAsState(
-					targetValue = if (bulbPop) 1.1f else 1f,
-					animationSpec = tween(durationMillis = 140, easing = FastOutSlowInEasing),
-					label = "bulbScale"
-				)
 				Row(
 					modifier = Modifier
 						.fillMaxWidth()
 						.clickable {
-							bulbPop = true
 							onToggleDark()
 						}
 						.padding(horizontal = 16.dp, vertical = 14.dp),
@@ -244,17 +241,21 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 						fontWeight = FontWeight.SemiBold,
 						modifier = Modifier.weight(1f)
 					)
-					androidx.compose.material3.Icon(
-						Icons.Outlined.Lightbulb,
-						contentDescription = "Theme",
-						modifier = Modifier.size(18.dp).scale(bulbScale),
-						tint = if (isDarkMode) Color.White else Color.Black
-					)
-				}
-				LaunchedEffect(bulbPop) {
-					if (bulbPop) {
-						delay(140)
-						bulbPop = false
+					androidx.compose.animation.AnimatedContent(
+						targetState = isDarkMode,
+						transitionSpec = {
+							(fadeIn(animationSpec = tween(380, easing = FastOutSlowInEasing)) +
+								scaleIn(initialScale = 0.88f)) togetherWith
+							fadeOut(animationSpec = tween(260, easing = FastOutSlowInEasing))
+						},
+						label = "bulbTransition"
+					) { dark ->
+						androidx.compose.material3.Icon(
+							Icons.Outlined.Lightbulb,
+							contentDescription = "Theme",
+							modifier = Modifier.size(18.dp),
+							tint = if (dark) Color.White else Color.Black
+						)
 					}
 				}
 				Divider()
