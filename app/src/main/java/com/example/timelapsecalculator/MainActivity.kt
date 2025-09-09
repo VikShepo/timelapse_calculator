@@ -265,7 +265,7 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 						.padding(horizontal = 16.dp, vertical = 14.dp),
 					verticalAlignment = Alignment.CenterVertically
 				) {
-					Text("Sprache", color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+					Text("Sprache", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
 				}
 				Divider()
 				Row(
@@ -275,7 +275,7 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 						.padding(horizontal = 16.dp, vertical = 14.dp),
 					verticalAlignment = Alignment.CenterVertically
 				) {
-					Text("Über", color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+					Text("Über", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
 				}
 			}
 		}
@@ -321,7 +321,7 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 
 						Text(
 							mode.title,
-							color = Color.Black,
+							color = MaterialTheme.colorScheme.onSurface,
 							fontSize = 12.sp,
 							fontWeight = FontWeight.SemiBold,
 							maxLines = 1,
@@ -348,7 +348,7 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 		OutlinedTextField(
 			value = fps,
 			onValueChange = { closeDropdown(); fps = it.filter { c -> c.isDigit() } },
-			label = { Text("FPS (Frames pro Sekunde)") },
+			label = { Text("FPS (Frames pro Sekunde)", color = MaterialTheme.colorScheme.onSurface) },
 			singleLine = true,
 			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 			modifier = Modifier.fillMaxWidth().onFocusChanged { if (it.isFocused) closeDropdown() },
@@ -359,7 +359,7 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 		OutlinedTextField(
 			value = sizeMb,
 			onValueChange = { closeDropdown(); sizeMb = it.filter { ch -> ch.isDigit() || ch == '.' || ch == ',' } },
-			label = { Text("Bildgröße pro Foto (MB)") },
+			label = { Text("Bildgröße pro Foto (MB)", color = MaterialTheme.colorScheme.onSurface) },
 			singleLine = true,
 			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 			modifier = Modifier.fillMaxWidth().onFocusChanged { if (it.isFocused) closeDropdown() }
@@ -576,7 +576,7 @@ private fun TimeInputRow(
 	onAnyFocus: () -> Unit = {},
 ) {
 	Column(modifier = Modifier.fillMaxWidth()) {
-		Text(label)
+		Text(label, color = MaterialTheme.colorScheme.onSurface)
 		Spacer(Modifier.height(6.dp))
 		Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
 			UnitField(value = hText, onChange = onHChange, placeholder = "hh", unit = "h", modifier = Modifier.weight(1f), onFocus = onAnyFocus)
