@@ -211,11 +211,11 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 			enter = expandVertically(
 				animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
 				expandFrom = Alignment.Top
-			) + fadeIn(),
+			) + fadeIn(animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)),
 			exit = shrinkVertically(
 				animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
 				shrinkTowards = Alignment.CenterVertically
-			) + fadeOut()
+			) + fadeOut(animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing))
 		) {
 			Column(
 				modifier = Modifier
