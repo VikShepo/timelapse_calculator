@@ -64,6 +64,8 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
@@ -75,12 +77,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.animation.Crossfade
 
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContent {
 			var isDarkMode by remember { mutableStateOf(false) }
+			var settingsExpanded by remember { mutableStateOf(false) }
 			val lightColors = lightColorScheme(
 				primary = Color(0xFF5E46A3),
 				secondary = Color(0xFFE9DDFB),
@@ -95,9 +99,16 @@ class MainActivity : ComponentActivity() {
 				surface = Color(0xFF1E1E1E),
 				onSurface = Color.White
 			)
-			MaterialTheme(colorScheme = if (isDarkMode) darkColors else lightColors) {
-				Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-					TimelapseScreen(isDarkMode = isDarkMode, onToggleDark = { isDarkMode = !isDarkMode })
+			Crossfade(targetState = isDarkMode, animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)) { dark ->
+				MaterialTheme(colorScheme = if (dark) darkColors else lightColors) {
+					Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+						TimelapseScreen(
+							isDarkMode = dark,
+							settingsExpanded = settingsExpanded,
+							setSettingsExpanded = { settingsExpanded = it },
+							onToggleDark = { isDarkMode = !isDarkMode }
+						)
+					}
 				}
 			}
 		}
@@ -108,7 +119,12 @@ private enum class Mode(val title: String) { Interval("Intervall"), Video("Video
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
+fun TimelapseScreen(
+    isDarkMode: Boolean,
+    settingsExpanded: Boolean,
+    setSettingsExpanded: (Boolean) -> Unit,
+    onToggleDark: () -> Unit
+) {
 	var selectedTab by remember { mutableStateOf(Mode.Interval) }
 	var fps by remember { mutableStateOf("") }
 	var sizeMb by remember { mutableStateOf("") }
@@ -128,7 +144,6 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 	var resultStorage by remember { mutableStateOf("") }
 	var errorMessage by remember { mutableStateOf("") }
 
-	var settingsExpanded by remember { mutableStateOf(false) }
 	val gearRotation by animateFloatAsState(
 		targetValue = if (settingsExpanded) 90f else 0f,
 		animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
@@ -136,7 +151,7 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 	)
 
 	fun closeDropdown() {
-		if (settingsExpanded) settingsExpanded = false
+		if (settingsExpanded) setSettingsExpanded(false)
 	}
 
 	fun computeError(): String {
@@ -195,7 +210,10 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 				textAlign = TextAlign.Start
 			)
 			IconButton(
-				onClick = { settingsExpanded = !settingsExpanded },
+				onClick = {
+					val next = !settingsExpanded
+					setSettingsExpanded(next)
+				},
 				modifier = Modifier.align(Alignment.CenterEnd)
 			) {
 				androidx.compose.material3.Icon(
@@ -249,9 +267,9 @@ fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 					androidx.compose.animation.AnimatedContent(
 						targetState = isDarkMode,
 						transitionSpec = {
-							(fadeIn(animationSpec = tween(380, easing = FastOutSlowInEasing)) +
-								scaleIn(initialScale = 0.88f)) togetherWith
-							fadeOut(animationSpec = tween(260, easing = FastOutSlowInEasing))
+							(fadeIn(animationSpec = tween(240, easing = LinearOutSlowInEasing)) +
+								scaleIn(initialScale = 0.94f)) togetherWith
+							fadeOut(animationSpec = tween(120, easing = FastOutLinearInEasing))
 						},
 						label = "bulbTransition"
 					) { dark ->
