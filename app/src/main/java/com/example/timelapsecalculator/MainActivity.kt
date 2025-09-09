@@ -50,6 +50,7 @@ import java.util.Locale
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -64,7 +65,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -199,14 +203,34 @@ fun TimelapseScreen() {
 					.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
 					.background(Color.White)
 			) {
+				var bulbPop by remember { mutableStateOf(false) }
+				val bulbScale by animateFloatAsState(
+					targetValue = if (bulbPop) 1.1f else 1f,
+					animationSpec = tween(durationMillis = 140, easing = FastOutSlowInEasing),
+					label = "bulbScale"
+				)
 				Row(
 					modifier = Modifier
 						.fillMaxWidth()
-						.clickable { /* TODO: theme toggle action */ }
+						.clickable {
+							bulbPop = true
+						}
 						.padding(horizontal = 16.dp, vertical = 14.dp),
 					verticalAlignment = Alignment.CenterVertically
 				) {
-					Text("Dunkel-Modus/Heller-Modus", color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+					Text("Dunkel-Modus/Heller-Modus", color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+					androidx.compose.material3.Icon(
+						Icons.Filled.Lightbulb,
+						contentDescription = "Theme",
+						modifier = Modifier.size(18.dp).scale(bulbScale),
+						tint = Color(0xFFFFC107)
+					)
+				}
+				LaunchedEffect(bulbPop) {
+					if (bulbPop) {
+						delay(140)
+						bulbPop = false
+					}
 				}
 				Divider()
 				Row(
