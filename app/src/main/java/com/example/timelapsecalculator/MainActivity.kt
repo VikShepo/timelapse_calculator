@@ -50,7 +50,7 @@ import java.util.Locale
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -69,14 +69,31 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.delay
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.darkColorScheme
 
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContent {
-			MaterialTheme {
-				Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFFFAF4FF)) {
-					TimelapseScreen()
+			var isDarkMode by remember { mutableStateOf(false) }
+			val lightColors = lightColorScheme(
+				primary = Color(0xFF5E46A3),
+				secondary = Color(0xFFE9DDFB),
+				background = Color(0xFFFAF4FF),
+				surface = Color.White,
+				onSurface = Color.Black
+			)
+			val darkColors = darkColorScheme(
+				primary = Color(0xFFBDA6FF),
+				secondary = Color(0xFF3B2E63),
+				background = Color(0xFF121212),
+				surface = Color(0xFF1E1E1E),
+				onSurface = Color.White
+			)
+			MaterialTheme(colorScheme = if (isDarkMode) darkColors else lightColors) {
+				Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+					TimelapseScreen(isDarkMode = isDarkMode, onToggleDark = { isDarkMode = !isDarkMode })
 				}
 			}
 		}
@@ -87,7 +104,7 @@ private enum class Mode(val title: String) { Interval("Intervall"), Video("Video
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimelapseScreen() {
+fun TimelapseScreen(isDarkMode: Boolean, onToggleDark: () -> Unit) {
 	var selectedTab by remember { mutableStateOf(Mode.Interval) }
 	var fps by remember { mutableStateOf("") }
 	var sizeMb by remember { mutableStateOf("") }
@@ -181,7 +198,7 @@ fun TimelapseScreen() {
 					Icons.Filled.Settings,
 					contentDescription = "Einstellungen",
 					modifier = Modifier.size(28.dp).rotate(gearRotation),
-					tint = Color(0xFF5E46A3)
+					tint = MaterialTheme.colorScheme.primary
 				)
 			}
 		}
@@ -201,7 +218,7 @@ fun TimelapseScreen() {
 					.fillMaxWidth()
 					.clip(RoundedCornerShape(16.dp))
 					.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
-					.background(Color.White)
+					.background(MaterialTheme.colorScheme.surface)
 			) {
 				var bulbPop by remember { mutableStateOf(false) }
 				val bulbScale by animateFloatAsState(
@@ -214,16 +231,24 @@ fun TimelapseScreen() {
 						.fillMaxWidth()
 						.clickable {
 							bulbPop = true
+							onToggleDark()
 						}
 						.padding(horizontal = 16.dp, vertical = 14.dp),
 					verticalAlignment = Alignment.CenterVertically
 				) {
-					Text("Dunkel-Modus/Heller-Modus", color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+					val modeText = if (isDarkMode) "Dunkel Modus" else "Heller Modus"
+					Text(
+						modeText,
+						color = MaterialTheme.colorScheme.onSurface,
+						fontSize = 14.sp,
+						fontWeight = FontWeight.SemiBold,
+						modifier = Modifier.weight(1f)
+					)
 					androidx.compose.material3.Icon(
-						Icons.Filled.Lightbulb,
+						Icons.Outlined.Lightbulb,
 						contentDescription = "Theme",
 						modifier = Modifier.size(18.dp).scale(bulbScale),
-						tint = Color(0xFFFFC107)
+						tint = if (isDarkMode) Color.White else Color.Black
 					)
 				}
 				LaunchedEffect(bulbPop) {
