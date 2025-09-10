@@ -220,7 +220,7 @@ private fun stringsFor(language: Language): Strings = when (language) {
 		darkMode = "Тёмная тема",
 		about = "О приложении",
 		tabInterval = "Интервал",
-		tabVideo = "Длительность видео",
+		tabVideo = "Длительность\nвидео",
 		tabShoot = "Время съёмки",
 		fpsLabel = "FPS (кадров в секунду)",
 		imageSizeMbLabel = "Размер фото (МБ)",
@@ -506,21 +506,38 @@ fun TimelapseScreen(
 							)
 						}
 
-						Text(
-							when (mode) {
-								Mode.Interval -> strings.tabInterval
-								Mode.Video -> strings.tabVideo
-								Mode.Shoot -> strings.tabShoot
-							},
-							color = if (selected) Color.Black else MaterialTheme.colorScheme.onSurface,
-							fontSize = 12.sp,
-							fontWeight = FontWeight.SemiBold,
-							maxLines = 1,
-							overflow = TextOverflow.Ellipsis,
-							modifier = Modifier
-								.align(Alignment.Center)
-								.offset(x = textOffset)
-						)
+						if (language == Language.RU && mode == Mode.Video) {
+							Text(
+								"Длительность\nвидео",
+								color = if (selected) Color.Black else MaterialTheme.colorScheme.onSurface,
+								fontSize = 11.sp,
+								fontWeight = FontWeight.SemiBold,
+								maxLines = 2,
+								overflow = TextOverflow.Clip,
+								textAlign = TextAlign.Center,
+								style = androidx.compose.ui.text.TextStyle(lineHeight = 11.sp),
+								modifier = Modifier
+									.align(Alignment.Center)
+									.offset(x = textOffset)
+							)
+						} else {
+ 							Text(
+ 								when (mode) {
+ 									Mode.Interval -> strings.tabInterval
+ 									Mode.Video -> strings.tabVideo
+ 									Mode.Shoot -> strings.tabShoot
+ 								},
+ 								color = if (selected) Color.Black else MaterialTheme.colorScheme.onSurface,
+ 								fontSize = 12.sp,
+ 								fontWeight = FontWeight.SemiBold,
+ 								maxLines = 1,
+ 								overflow = TextOverflow.Ellipsis,
+ 								textAlign = TextAlign.Center,
+ 								modifier = Modifier
+ 									.align(Alignment.Center)
+ 									.offset(x = textOffset)
+ 							)
+ 						}
 					}
 					if (index < 2) {
 						Box(
