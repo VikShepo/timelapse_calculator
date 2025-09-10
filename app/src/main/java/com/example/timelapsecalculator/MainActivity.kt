@@ -117,6 +117,18 @@ class MainActivity : ComponentActivity() {
 
 private enum class Mode(val title: String) { Interval("Intervall"), Video("Videodauer"), Shoot("Drehzeit") }
 
+private enum class Language(val leftLabel: String, val rightText: String, val flag: String) {
+	DE(leftLabel = "Sprache", rightText = "Deutsch", flag = "\uD83C\uDDE9\uD83C\uDDEA"),
+	EN(leftLabel = "Language", rightText = "English", flag = "\uD83C\uDDEC\uD83C\uDDE7"),
+	RU(leftLabel = "Язык", rightText = "Русский", flag = "\uD83C\uDDF7\uD83C\uDDFA");
+
+	fun next(): Language = when (this) {
+		DE -> EN
+		EN -> RU
+		RU -> DE
+	}
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimelapseScreen(
@@ -143,6 +155,8 @@ fun TimelapseScreen(
 	var resultPhotos by remember { mutableStateOf("") }
 	var resultStorage by remember { mutableStateOf("") }
 	var errorMessage by remember { mutableStateOf("") }
+
+	var language by remember { mutableStateOf(Language.DE) }
 
 	val gearRotation by animateFloatAsState(
 		targetValue = if (settingsExpanded) 90f else 0f,
@@ -282,14 +296,40 @@ fun TimelapseScreen(
 					}
 				}
 				HorizontalDivider()
-				Row(
+				Box(
 					modifier = Modifier
 						.fillMaxWidth()
-						.clickable { /* TODO: language action */ }
-						.padding(horizontal = 16.dp, vertical = 14.dp),
-					verticalAlignment = Alignment.CenterVertically
+						.clickable { language = language.next() }
+						.padding(horizontal = 16.dp, vertical = 14.dp)
 				) {
-					Text("Sprache", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+					androidx.compose.animation.AnimatedContent(
+						targetState = language.leftLabel,
+						transitionSpec = {
+							(fadeIn(animationSpec = tween(240, easing = LinearOutSlowInEasing)) +
+								scaleIn(initialScale = 0.94f)) togetherWith
+							fadeOut(animationSpec = tween(120, easing = FastOutLinearInEasing))
+						},
+						label = "langLeftTransition",
+						modifier = Modifier.align(Alignment.CenterStart)
+					) { left ->
+						Text(left, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+					}
+					androidx.compose.animation.AnimatedContent(
+						targetState = language,
+						transitionSpec = {
+							(fadeIn(animationSpec = tween(240, easing = LinearOutSlowInEasing)) +
+								scaleIn(initialScale = 0.94f)) togetherWith
+							fadeOut(animationSpec = tween(120, easing = FastOutLinearInEasing))
+						},
+						label = "langRightTransition",
+						modifier = Modifier.align(Alignment.CenterEnd)
+					) { lang ->
+						Row(verticalAlignment = Alignment.CenterVertically) {
+							Text(lang.rightText, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+							Spacer(Modifier.width(8.dp))
+							Text(lang.flag, fontSize = 18.sp)
+						}
+					}
 				}
 				HorizontalDivider()
 				Row(
