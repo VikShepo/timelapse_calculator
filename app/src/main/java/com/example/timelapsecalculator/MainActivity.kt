@@ -115,7 +115,7 @@ class MainActivity : ComponentActivity() {
 	}
 }
 
-private enum class Mode(val title: String) { Interval("Intervall"), Video("Videodauer"), Shoot("Drehzeit") }
+private enum class Mode { Interval, Video, Shoot }
 
 private enum class Language(val leftLabel: String, val rightText: String, val flag: String) {
 	DE(leftLabel = "Sprache", rightText = "Deutsch", flag = "\uD83C\uDDE9\uD83C\uDDEA"),
@@ -127,6 +127,122 @@ private enum class Language(val leftLabel: String, val rightText: String, val fl
 		EN -> RU
 		RU -> DE
 	}
+}
+
+private data class Strings(
+	val locale: java.util.Locale,
+	val appTitle: String,
+	val lightMode: String,
+	val darkMode: String,
+	val about: String,
+	val tabInterval: String,
+	val tabVideo: String,
+	val tabShoot: String,
+	val fpsLabel: String,
+	val imageSizeMbLabel: String,
+	val labelVideoDuration: String,
+	val labelShootDuration: String,
+	val labelInterval: String,
+	val errorEnterVideoAndShoot: String,
+	val errorEnterVideo: String,
+	val errorEnterShoot: String,
+	val errorEnterIntervalAndShoot: String,
+	val errorEnterInterval: String,
+	val errorEnterIntervalAndVideo: String,
+	val buttonCalculate: String,
+	val resultIntervalPrefix: String,
+	val resultVideoPrefix: String,
+	val resultShootPrefix: String,
+	val photosCountPrefix: String,
+	val storageSizePrefix: String,
+)
+
+private fun stringsFor(language: Language): Strings = when (language) {
+	Language.DE -> Strings(
+		locale = java.util.Locale.GERMANY,
+		appTitle = "Timelapse Rechner",
+		lightMode = "Heller Modus",
+		darkMode = "Dunkler Modus",
+		about = "Über",
+		tabInterval = "Intervall",
+		tabVideo = "Videodauer",
+		tabShoot = "Drehzeit",
+		fpsLabel = "FPS (Frames pro Sekunde)",
+		imageSizeMbLabel = "Bildgröße pro Foto (MB)",
+		labelVideoDuration = "Videodauer",
+		labelShootDuration = "Drehzeit",
+		labelInterval = "Intervall",
+		errorEnterVideoAndShoot = "Bitte Videodauer und Drehzeit eingeben.",
+		errorEnterVideo = "Bitte Videodauer eingeben.",
+		errorEnterShoot = "Bitte Drehzeit eingeben.",
+		errorEnterIntervalAndShoot = "Bitte Intervall und Drehzeit eingeben.",
+		errorEnterInterval = "Bitte Intervall eingeben.",
+		errorEnterIntervalAndVideo = "Bitte Intervall und Videodauer eingeben.",
+		buttonCalculate = "Berechnen",
+		resultIntervalPrefix = "Intervall (s): ",
+		resultVideoPrefix = "Videodauer (s): ",
+		resultShootPrefix = "Drehzeit (s): ",
+		photosCountPrefix = "Anzahl Fotos: ",
+		storageSizePrefix = "Speichergröße: "
+	)
+	Language.EN -> Strings(
+		locale = java.util.Locale.UK,
+		appTitle = "Timelapse Calculator",
+		lightMode = "Light Mode",
+		darkMode = "Dark Mode",
+		about = "About",
+		tabInterval = "Interval",
+		tabVideo = "Video duration",
+		tabShoot = "Shooting time",
+		fpsLabel = "FPS (frames per second)",
+		imageSizeMbLabel = "Image size per photo (MB)",
+		labelVideoDuration = "Video duration",
+		labelShootDuration = "Shooting time",
+		labelInterval = "Interval",
+		errorEnterVideoAndShoot = "Please enter video duration and shooting time.",
+		errorEnterVideo = "Please enter video duration.",
+		errorEnterShoot = "Please enter shooting time.",
+		errorEnterIntervalAndShoot = "Please enter interval and shooting time.",
+		errorEnterInterval = "Please enter interval.",
+		errorEnterIntervalAndVideo = "Please enter interval and video duration.",
+		buttonCalculate = "Calculate",
+		resultIntervalPrefix = "Interval (s): ",
+		resultVideoPrefix = "Video duration (s): ",
+		resultShootPrefix = "Shooting time (s): ",
+		photosCountPrefix = "Number of photos: ",
+		storageSizePrefix = "Storage size: "
+	)
+	Language.RU -> Strings(
+		locale = java.util.Locale("ru", "RU"),
+		appTitle = "Таймлапс калькулятор",
+		lightMode = "Светлая тема",
+		darkMode = "Тёмная тема",
+		about = "О приложении",
+		tabInterval = "Интервал",
+		tabVideo = "Длительность видео",
+		tabShoot = "Время съёмки",
+		fpsLabel = "FPS (кадров в секунду)",
+		imageSizeMbLabel = "Размер фото (МБ)",
+		labelVideoDuration = "Длительность видео",
+		labelShootDuration = "Время съёмки",
+		labelInterval = "Интервал",
+		errorEnterVideoAndShoot = "Пожалуйста, введите длительность видео и время съёмки.",
+		errorEnterVideo = "Пожалуйста, введите длительность видео.",
+		errorEnterShoot = "Пожалуйста, введите время съёмки.",
+		errorEnterIntervalAndShoot = "Пожалуйста, введите интервал и время съёмки.",
+		errorEnterInterval = "Пожалуйста, введите интервал.",
+		errorEnterIntervalAndVideo = "Пожалуйста, введите интервал и длительность видео.",
+		buttonCalculate = "Рассчитать",
+		resultIntervalPrefix = "Интервал (с): ",
+		resultVideoPrefix = "Длительность видео (с): ",
+		resultShootPrefix = "Время съёмки (с): ",
+		photosCountPrefix = "Количество фото: ",
+		storageSizePrefix = "Объём памяти: "
+	)
+}
+
+private fun Double.format(decimals: Int, locale: java.util.Locale): String {
+	return String.format(locale, "%1$.${'$'}{decimals}f", this)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -157,6 +273,7 @@ fun TimelapseScreen(
 	var errorMessage by remember { mutableStateOf("") }
 
 	var language by remember { mutableStateOf(Language.DE) }
+	val strings = stringsFor(language)
 
 	val gearRotation by animateFloatAsState(
 		targetValue = if (settingsExpanded) 90f else 0f,
@@ -177,9 +294,9 @@ fun TimelapseScreen(
 				val missingVideo = isTripleEmpty(videoH, videoM, videoS)
 				val missingShoot = isTripleEmpty(shootH, shootM, shootS)
 				when {
-					missingVideo && missingShoot -> "Bitte Videodauer und Drehzeit eingeben."
-					missingVideo -> "Bitte Videodauer eingeben."
-					missingShoot -> "Bitte Drehzeit eingeben."
+					missingVideo && missingShoot -> strings.errorEnterVideoAndShoot
+					missingVideo -> strings.errorEnterVideo
+					missingShoot -> strings.errorEnterShoot
 					else -> ""
 				}
 			}
@@ -187,9 +304,9 @@ fun TimelapseScreen(
 				val missingInterval = isTripleEmpty(intervalH, intervalM, intervalS)
 				val missingShoot = isTripleEmpty(shootH, shootM, shootS)
 				when {
-					missingInterval && missingShoot -> "Bitte Intervall und Drehzeit eingeben."
-					missingInterval -> "Bitte Intervall eingeben."
-					missingShoot -> "Bitte Drehzeit eingeben."
+					missingInterval && missingShoot -> strings.errorEnterIntervalAndShoot
+					missingInterval -> strings.errorEnterInterval
+					missingShoot -> strings.errorEnterShoot
 					else -> ""
 				}
 			}
@@ -197,9 +314,9 @@ fun TimelapseScreen(
 				val missingInterval = isTripleEmpty(intervalH, intervalM, intervalS)
 				val missingVideo = isTripleEmpty(videoH, videoM, videoS)
 				when {
-					missingInterval && missingVideo -> "Bitte Intervall und Videodauer eingeben."
-					missingInterval -> "Bitte Intervall eingeben."
-					missingVideo -> "Bitte Videodauer eingeben."
+					missingInterval && missingVideo -> strings.errorEnterIntervalAndVideo
+					missingInterval -> strings.errorEnterInterval
+					missingVideo -> strings.errorEnterVideo
 					else -> ""
 				}
 			}
@@ -215,7 +332,7 @@ fun TimelapseScreen(
 	) {
 		Box(modifier = Modifier.fillMaxWidth()) {
 			Text(
-				"Timelapse Rechner",
+				strings.appTitle,
 				fontSize = 34.sp,
 				fontWeight = FontWeight.Bold,
 				modifier = Modifier
@@ -270,7 +387,7 @@ fun TimelapseScreen(
 						.padding(horizontal = 16.dp, vertical = 14.dp),
 					verticalAlignment = Alignment.CenterVertically
 				) {
-					val modeText = if (isDarkMode) "Heller Modus" else "Dunkler Modus"
+					val modeText = if (isDarkMode) strings.lightMode else strings.darkMode
 					Text(
 						modeText,
 						color = MaterialTheme.colorScheme.onSurface,
@@ -339,7 +456,7 @@ fun TimelapseScreen(
 						.padding(horizontal = 16.dp, vertical = 14.dp),
 					verticalAlignment = Alignment.CenterVertically
 				) {
-					Text("Über", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+					Text(strings.about, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
 				}
 				}
 			}
@@ -388,7 +505,11 @@ fun TimelapseScreen(
 						}
 
 						Text(
-							mode.title,
+							when (mode) {
+								Mode.Interval -> strings.tabInterval
+								Mode.Video -> strings.tabVideo
+								Mode.Shoot -> strings.tabShoot
+							},
 							color = if (selected) Color.Black else MaterialTheme.colorScheme.onSurface,
 							fontSize = 12.sp,
 							fontWeight = FontWeight.SemiBold,
@@ -416,7 +537,7 @@ fun TimelapseScreen(
 		OutlinedTextField(
 			value = fps,
 			onValueChange = { closeDropdown(); fps = it.filter { c -> c.isDigit() } },
-			label = { Text("FPS (Frames pro Sekunde)", color = MaterialTheme.colorScheme.onSurface) },
+			label = { Text(strings.fpsLabel, color = MaterialTheme.colorScheme.onSurface) },
 			singleLine = true,
 			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 			modifier = Modifier.fillMaxWidth().onFocusChanged { if (it.isFocused) closeDropdown() },
@@ -427,7 +548,7 @@ fun TimelapseScreen(
 		OutlinedTextField(
 			value = sizeMb,
 			onValueChange = { closeDropdown(); sizeMb = it.filter { ch -> ch.isDigit() || ch == '.' || ch == ',' } },
-			label = { Text("Bildgröße pro Foto (MB)", color = MaterialTheme.colorScheme.onSurface) },
+			label = { Text(strings.imageSizeMbLabel, color = MaterialTheme.colorScheme.onSurface) },
 			singleLine = true,
 			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 			modifier = Modifier.fillMaxWidth().onFocusChanged { if (it.isFocused) closeDropdown() }
@@ -438,7 +559,7 @@ fun TimelapseScreen(
 		when (selectedTab) {
 			Mode.Interval -> {
 				TimeInputRow(
-					label = "Videodauer",
+					label = strings.labelVideoDuration,
 					hText = videoH,
 					mText = videoM,
 					sText = videoS,
@@ -449,7 +570,7 @@ fun TimelapseScreen(
 				)
 				Spacer(Modifier.height(12.dp))
 				TimeInputRow(
-					label = "Drehzeit",
+					label = strings.labelShootDuration,
 					hText = shootH,
 					mText = shootM,
 					sText = shootS,
@@ -461,7 +582,7 @@ fun TimelapseScreen(
 			}
 			Mode.Video -> {
 				TimeInputRow(
-					label = "Intervall",
+					label = strings.labelInterval,
 					hText = intervalH,
 					mText = intervalM,
 					sText = intervalS,
@@ -472,7 +593,7 @@ fun TimelapseScreen(
 				)
 				Spacer(Modifier.height(12.dp))
 				TimeInputRow(
-					label = "Drehzeit",
+					label = strings.labelShootDuration,
 					hText = shootH,
 					mText = shootM,
 					sText = shootS,
@@ -484,7 +605,7 @@ fun TimelapseScreen(
 			}
 			Mode.Shoot -> {
 				TimeInputRow(
-					label = "Intervall",
+					label = strings.labelInterval,
 					hText = intervalH,
 					mText = intervalM,
 					sText = intervalS,
@@ -495,7 +616,7 @@ fun TimelapseScreen(
 				)
 				Spacer(Modifier.height(12.dp))
 				TimeInputRow(
-					label = "Videodauer",
+					label = strings.labelVideoDuration,
 					hText = videoH,
 					mText = videoM,
 					sText = videoS,
@@ -564,13 +685,13 @@ fun TimelapseScreen(
 							val (ih, im, isec) = secondsToTriple(interval)
 							intervalH = ih; intervalM = im; intervalS = isec
 							val photos = frames.toInt()
-							resultPrimary = "Intervall (Sek.): ${interval.formatGermanShort()}"
+							resultPrimary = strings.resultIntervalPrefix + interval.format(3, strings.locale)
 							if (fpsProvided) {
-								resultPhotos = "Anzahl Fotos: ${photos}"
+								resultPhotos = strings.photosCountPrefix + photos.toString()
 							}
 							if (sizeProvided && !sizeVal.isNaN()) {
 								val storage = photos * sizeVal
-								resultStorage = "Speichergröße: ${storage.formatMb()} MB"
+								resultStorage = strings.storageSizePrefix + storage.format(2, strings.locale) + " MB"
 							}
 						}
 					}
@@ -581,13 +702,13 @@ fun TimelapseScreen(
 							val (vh, vm, vs) = secondsToTriple(video)
 							videoH = vh; videoM = vm; videoS = vs
 							val photos = frames.toInt()
-							resultPrimary = "Videodauer (Sek.): ${video.formatGermanShort()}"
+							resultPrimary = strings.resultVideoPrefix + video.format(3, strings.locale)
 							if (fpsProvided) {
-								resultPhotos = "Anzahl Fotos: ${photos}"
+								resultPhotos = strings.photosCountPrefix + photos.toString()
 							}
 							if (sizeProvided && !sizeVal.isNaN()) {
 								val storage = photos * sizeVal
-								resultStorage = "Speichergröße: ${storage.formatMb()} MB"
+								resultStorage = strings.storageSizePrefix + storage.format(2, strings.locale) + " MB"
 							}
 						}
 					}
@@ -598,13 +719,13 @@ fun TimelapseScreen(
 							val (sh, sm, ss) = secondsToTriple(shoot)
 							shootH = sh; shootM = sm; shootS = ss
 							val photos = frames.toInt()
-							resultPrimary = "Drehzeit (Sek.): ${shoot.formatGermanShort()}"
+							resultPrimary = strings.resultShootPrefix + shoot.format(3, strings.locale)
 							if (fpsProvided) {
-								resultPhotos = "Anzahl Fotos: ${photos}"
+								resultPhotos = strings.photosCountPrefix + photos.toString()
 							}
 							if (sizeProvided && !sizeVal.isNaN()) {
 								val storage = photos * sizeVal
-								resultStorage = "Speichergröße: ${storage.formatMb()} MB"
+								resultStorage = strings.storageSizePrefix + storage.format(2, strings.locale) + " MB"
 							}
 						}
 					}
@@ -614,7 +735,7 @@ fun TimelapseScreen(
 				.fillMaxWidth(),
 			colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E46A3))
 		) {
-			Text("Berechnen", color = Color.White)
+			Text(strings.buttonCalculate, color = Color.White)
 		}
 
 		Spacer(Modifier.height(24.dp))
