@@ -78,6 +78,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.FiniteAnimationSpec
 
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -275,6 +276,11 @@ fun TimelapseScreen(
 	var language by remember { mutableStateOf(Language.DE) }
 	val strings = stringsFor(language)
 
+	// Smoother fade for language changes
+	val textFadeSpec: FiniteAnimationSpec<Float> = tween(durationMillis = 420, easing = FastOutSlowInEasing)
+	val textFadeIn = fadeIn(animationSpec = textFadeSpec)
+	val textFadeOut = fadeOut(animationSpec = textFadeSpec)
+
 	val gearRotation by animateFloatAsState(
 		targetValue = if (settingsExpanded) 90f else 0f,
 		animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
@@ -331,15 +337,17 @@ fun TimelapseScreen(
 		verticalArrangement = Arrangement.Top
 	) {
 		Box(modifier = Modifier.fillMaxWidth()) {
-			Text(
-				strings.appTitle,
-				fontSize = 34.sp,
-				fontWeight = FontWeight.Bold,
-				modifier = Modifier
-					.align(Alignment.CenterStart)
-					.fillMaxWidth(),
-				textAlign = TextAlign.Start
-			)
+			Crossfade(targetState = language, animationSpec = textFadeSpec) { _ ->
+				Text(
+					strings.appTitle,
+					fontSize = 34.sp,
+					fontWeight = FontWeight.Bold,
+					modifier = Modifier
+						.align(Alignment.CenterStart)
+						.fillMaxWidth(),
+					textAlign = TextAlign.Start
+				)
+			}
 			IconButton(
 				onClick = {
 					val next = !settingsExpanded
@@ -378,86 +386,80 @@ fun TimelapseScreen(
 						.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
 						.background(MaterialTheme.colorScheme.surface)
 				) {
-				Row(
-					modifier = Modifier
-						.fillMaxWidth()
-						.clickable {
-							onToggleDark()
+					Box(
+						modifier = Modifier
+							.fillMaxWidth()
+							.clickable { onToggleDark() }
+							.padding(horizontal = 16.dp, vertical = 14.dp)
+					) {
+						Crossfade(targetState = language, animationSpec = textFadeSpec) { _ ->
+							val modeText = if (isDarkMode) strings.lightMode else strings.darkMode
+							Text(
+								modeText,
+								color = MaterialTheme.colorScheme.onSurface,
+								fontSize = 14.sp,
+								fontWeight = FontWeight.SemiBold,
+								modifier = Modifier.align(Alignment.CenterStart)
+							)
 						}
-						.padding(horizontal = 16.dp, vertical = 14.dp),
-					verticalAlignment = Alignment.CenterVertically
-				) {
-					val modeText = if (isDarkMode) strings.lightMode else strings.darkMode
-					Text(
-						modeText,
-						color = MaterialTheme.colorScheme.onSurface,
-						fontSize = 14.sp,
-						fontWeight = FontWeight.SemiBold,
-						modifier = Modifier.weight(1f)
-					)
-					androidx.compose.animation.AnimatedContent(
-						targetState = isDarkMode,
-						transitionSpec = {
-							(fadeIn(animationSpec = tween(240, easing = LinearOutSlowInEasing)) +
-								scaleIn(initialScale = 0.94f)) togetherWith
-							fadeOut(animationSpec = tween(120, easing = FastOutLinearInEasing))
-						},
-						label = "bulbTransition"
-					) { dark ->
-						androidx.compose.material3.Icon(
-							Icons.Outlined.Lightbulb,
-							contentDescription = "Theme",
-							modifier = Modifier.size(18.dp),
-							tint = if (dark) Color.White else Color.Black
-						)
-					}
-				}
-				HorizontalDivider()
-				Box(
-					modifier = Modifier
-						.fillMaxWidth()
-						.clickable { language = language.next() }
-						.padding(horizontal = 16.dp, vertical = 14.dp)
-				) {
-					androidx.compose.animation.AnimatedContent(
-						targetState = language.leftLabel,
-						transitionSpec = {
-							(fadeIn(animationSpec = tween(240, easing = LinearOutSlowInEasing)) +
-								scaleIn(initialScale = 0.94f)) togetherWith
-							fadeOut(animationSpec = tween(120, easing = FastOutLinearInEasing))
-						},
-						label = "langLeftTransition",
-						modifier = Modifier.align(Alignment.CenterStart)
-					) { left ->
-						Text(left, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-					}
-					androidx.compose.animation.AnimatedContent(
-						targetState = language,
-						transitionSpec = {
-							(fadeIn(animationSpec = tween(240, easing = LinearOutSlowInEasing)) +
-								scaleIn(initialScale = 0.94f)) togetherWith
-							fadeOut(animationSpec = tween(120, easing = FastOutLinearInEasing))
-						},
-						label = "langRightTransition",
-						modifier = Modifier.align(Alignment.CenterEnd)
-					) { lang ->
-						Row(verticalAlignment = Alignment.CenterVertically) {
-							Text(lang.rightText, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-							Spacer(Modifier.width(8.dp))
-							Text(lang.flag, fontSize = 18.sp)
+						androidx.compose.animation.AnimatedContent(
+							targetState = isDarkMode,
+							transitionSpec = {
+								(fadeIn(animationSpec = tween(240, easing = LinearOutSlowInEasing)) +
+									scaleIn(initialScale = 0.94f)) togetherWith
+								fadeOut(animationSpec = tween(120, easing = FastOutLinearInEasing))
+							},
+							label = "bulbTransition",
+							modifier = Modifier.align(Alignment.CenterEnd)
+						) { dark ->
+							androidx.compose.material3.Icon(
+								Icons.Outlined.Lightbulb,
+								contentDescription = "Theme",
+								modifier = Modifier.size(18.dp),
+								tint = if (dark) Color.White else Color.Black
+							)
 						}
 					}
-				}
-				HorizontalDivider()
-				Row(
-					modifier = Modifier
-						.fillMaxWidth()
-						.clickable { /* TODO: about action */ }
-						.padding(horizontal = 16.dp, vertical = 14.dp),
-					verticalAlignment = Alignment.CenterVertically
-				) {
-					Text(strings.about, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-				}
+					HorizontalDivider()
+					Box(
+						modifier = Modifier
+							.fillMaxWidth()
+							.clickable { language = language.next() }
+							.padding(horizontal = 16.dp, vertical = 14.dp)
+					) {
+						androidx.compose.animation.AnimatedContent(
+							targetState = language.leftLabel,
+							transitionSpec = { textFadeIn togetherWith textFadeOut },
+							label = "langLeftTransition",
+							modifier = Modifier.align(Alignment.CenterStart)
+						) { left ->
+							Text(left, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+						}
+						androidx.compose.animation.AnimatedContent(
+							targetState = language,
+							transitionSpec = { textFadeIn togetherWith textFadeOut },
+							label = "langRightTransition",
+							modifier = Modifier.align(Alignment.CenterEnd)
+						) { lang ->
+							Row(verticalAlignment = Alignment.CenterVertically) {
+								Text(lang.rightText, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+								Spacer(Modifier.width(8.dp))
+								Text(lang.flag, fontSize = 18.sp)
+							}
+						}
+					}
+					HorizontalDivider()
+					Row(
+						modifier = Modifier
+							.fillMaxWidth()
+							.clickable { /* TODO: about action */ }
+							.padding(horizontal = 16.dp, vertical = 14.dp),
+						verticalAlignment = Alignment.CenterVertically
+					) {
+						Crossfade(targetState = language, animationSpec = textFadeSpec) { _ ->
+							Text(strings.about, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+						}
+					}
 				}
 			}
 		}
@@ -537,7 +539,7 @@ fun TimelapseScreen(
 		OutlinedTextField(
 			value = fps,
 			onValueChange = { closeDropdown(); fps = it.filter { c -> c.isDigit() } },
-			label = { Text(strings.fpsLabel, color = MaterialTheme.colorScheme.onSurface) },
+			label = { Crossfade(targetState = language, animationSpec = textFadeSpec) { _ -> Text(strings.fpsLabel, color = MaterialTheme.colorScheme.onSurface) } },
 			singleLine = true,
 			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 			modifier = Modifier.fillMaxWidth().onFocusChanged { if (it.isFocused) closeDropdown() },
@@ -548,7 +550,7 @@ fun TimelapseScreen(
 		OutlinedTextField(
 			value = sizeMb,
 			onValueChange = { closeDropdown(); sizeMb = it.filter { ch -> ch.isDigit() || ch == '.' || ch == ',' } },
-			label = { Text(strings.imageSizeMbLabel, color = MaterialTheme.colorScheme.onSurface) },
+			label = { Crossfade(targetState = language, animationSpec = textFadeSpec) { _ -> Text(strings.imageSizeMbLabel, color = MaterialTheme.colorScheme.onSurface) } },
 			singleLine = true,
 			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 			modifier = Modifier.fillMaxWidth().onFocusChanged { if (it.isFocused) closeDropdown() }
@@ -631,7 +633,9 @@ fun TimelapseScreen(
 		// Error message area above the button
 		if (errorMessage.isNotBlank()) {
 			Spacer(Modifier.height(8.dp))
-			Text(errorMessage, color = Color(0xFFD32F2F), fontSize = 14.sp)
+			Crossfade(targetState = Pair(language, errorMessage), animationSpec = textFadeSpec) { (_, msg) ->
+				Text(msg, color = Color(0xFFD32F2F), fontSize = 14.sp)
+			}
 		}
 
 		Spacer(Modifier.height(20.dp))
@@ -735,19 +739,27 @@ fun TimelapseScreen(
 				.fillMaxWidth(),
 			colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E46A3))
 		) {
-			Text(strings.buttonCalculate, color = Color.White)
+			Crossfade(targetState = language, animationSpec = textFadeSpec) { _ ->
+				Text(strings.buttonCalculate, color = Color.White)
+			}
 		}
 
 		Spacer(Modifier.height(24.dp))
 		if (resultPrimary.isNotBlank()) {
-			Text(resultPrimary, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
+			Crossfade(targetState = Pair(language, resultPrimary), animationSpec = textFadeSpec) { (_, text) ->
+				Text(text, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
+			}
 			if (resultPhotos.isNotBlank()) {
 				Spacer(Modifier.height(12.dp))
-				Text(resultPhotos, fontSize = 18.sp)
+				Crossfade(targetState = Pair(language, resultPhotos), animationSpec = textFadeSpec) { (_, text) ->
+					Text(text, fontSize = 18.sp)
+				}
 			}
 			if (resultStorage.isNotBlank()) {
 				Spacer(Modifier.height(8.dp))
-				Text(resultStorage, fontSize = 18.sp)
+				Crossfade(targetState = Pair(language, resultStorage), animationSpec = textFadeSpec) { (_, text) ->
+					Text(text, fontSize = 18.sp)
+				}
 			}
 		}
 	}
@@ -765,7 +777,9 @@ private fun TimeInputRow(
 	onAnyFocus: () -> Unit = {},
 ) {
 	Column(modifier = Modifier.fillMaxWidth()) {
-		Text(label, color = MaterialTheme.colorScheme.onSurface)
+		Crossfade(targetState = label, animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing)) { text ->
+			Text(text, color = MaterialTheme.colorScheme.onSurface)
+		}
 		Spacer(Modifier.height(6.dp))
 		Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
 			UnitField(value = hText, onChange = onHChange, placeholder = "hh", unit = "h", modifier = Modifier.weight(1f), onFocus = onAnyFocus)
