@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
 		setContent {
 			var isDarkMode by remember { mutableStateOf(false) }
 			var settingsExpanded by remember { mutableStateOf(false) }
-			var language by rememberSaveable { mutableStateOf(Language.DE) }
+			var language by rememberSaveable { mutableStateOf(Language.EN) }
 			val lightColors = lightColorScheme(
 				primary = Color(0xFF5E46A3),
 				secondary = Color(0xFFE9DDFB),
@@ -123,14 +123,14 @@ class MainActivity : ComponentActivity() {
 private enum class Mode { Interval, Video, Shoot }
 
 private enum class Language(val leftLabel: String, val rightText: String, val flag: String) {
-	DE(leftLabel = "Sprache", rightText = "Deutsch", flag = "\uD83C\uDDE9\uD83C\uDDEA"),
 	EN(leftLabel = "Language", rightText = "English", flag = "\uD83C\uDDEC\uD83C\uDDE7"),
+	DE(leftLabel = "Sprache", rightText = "Deutsch", flag = "\uD83C\uDDE9\uD83C\uDDEA"),
 	RU(leftLabel = "Язык", rightText = "Русский", flag = "\uD83C\uDDF7\uD83C\uDDFA");
 
 	fun next(): Language = when (this) {
-		DE -> EN
-		EN -> RU
-		RU -> DE
+		EN -> DE
+		DE -> RU
+		RU -> EN
 	}
 }
 
@@ -247,7 +247,8 @@ private fun stringsFor(language: Language): Strings = when (language) {
 }
 
 private fun Double.format(decimals: Int, locale: java.util.Locale): String {
-	return String.format(locale, "%1$.${'$'}{decimals}f", this)
+	val pattern = "% .${decimals}f".replace(" ", "")
+	return String.format(locale, pattern, this)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
