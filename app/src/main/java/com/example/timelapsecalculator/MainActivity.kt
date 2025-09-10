@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,6 +87,7 @@ class MainActivity : ComponentActivity() {
 		setContent {
 			var isDarkMode by remember { mutableStateOf(false) }
 			var settingsExpanded by remember { mutableStateOf(false) }
+			var language by rememberSaveable { mutableStateOf(Language.DE) }
 			val lightColors = lightColorScheme(
 				primary = Color(0xFF5E46A3),
 				secondary = Color(0xFFE9DDFB),
@@ -104,6 +106,8 @@ class MainActivity : ComponentActivity() {
 				MaterialTheme(colorScheme = if (dark) darkColors else lightColors) {
 					Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
 						TimelapseScreen(
+							language = language,
+							setLanguage = { language = it },
 							isDarkMode = dark,
 							settingsExpanded = settingsExpanded,
 							setSettingsExpanded = { settingsExpanded = it },
@@ -248,7 +252,9 @@ private fun Double.format(decimals: Int, locale: java.util.Locale): String {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimelapseScreen(
+private fun TimelapseScreen(
+    language: Language,
+    setLanguage: (Language) -> Unit,
     isDarkMode: Boolean,
     settingsExpanded: Boolean,
     setSettingsExpanded: (Boolean) -> Unit,
@@ -273,7 +279,6 @@ fun TimelapseScreen(
 	var resultStorage by remember { mutableStateOf("") }
 	var errorMessage by remember { mutableStateOf("") }
 
-	var language by remember { mutableStateOf(Language.DE) }
 	val strings = stringsFor(language)
 
 	// Smoother fade for language changes
@@ -425,7 +430,7 @@ fun TimelapseScreen(
 					Box(
 						modifier = Modifier
 							.fillMaxWidth()
-							.clickable { language = language.next() }
+							.clickable { setLanguage(language.next()) }
 							.padding(horizontal = 16.dp, vertical = 14.dp)
 					) {
 						androidx.compose.animation.AnimatedContent(
