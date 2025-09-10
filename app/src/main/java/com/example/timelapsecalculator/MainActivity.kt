@@ -337,30 +337,31 @@ fun TimelapseScreen(
 		verticalArrangement = Arrangement.Top
 	) {
 		Box(modifier = Modifier.fillMaxWidth()) {
-			Crossfade(targetState = language, animationSpec = textFadeSpec) { _ ->
-				Text(
-					strings.appTitle,
-					fontSize = 34.sp,
-					fontWeight = FontWeight.Bold,
-					modifier = Modifier
-						.align(Alignment.CenterStart)
-						.fillMaxWidth(),
-					textAlign = TextAlign.Start
-				)
-			}
-			IconButton(
-				onClick = {
-					val next = !settingsExpanded
-					setSettingsExpanded(next)
-				},
-				modifier = Modifier.align(Alignment.CenterEnd)
-			) {
-				androidx.compose.material3.Icon(
-					Icons.Filled.Settings,
-					contentDescription = "Einstellungen",
-					modifier = Modifier.size(28.dp).rotate(gearRotation),
-					tint = MaterialTheme.colorScheme.primary
-				)
+			Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+				Crossfade(targetState = language, animationSpec = textFadeSpec, modifier = Modifier.weight(1f)) { _ ->
+					Text(
+						strings.appTitle,
+						fontSize = 28.sp,
+						fontWeight = FontWeight.Bold,
+						modifier = Modifier.fillMaxWidth(),
+						textAlign = TextAlign.Start,
+						maxLines = 1,
+						overflow = TextOverflow.Ellipsis
+					)
+				}
+				IconButton(
+					onClick = {
+						val next = !settingsExpanded
+						setSettingsExpanded(next)
+					}
+				) {
+					androidx.compose.material3.Icon(
+						Icons.Filled.Settings,
+						contentDescription = "Einstellungen",
+						modifier = Modifier.size(28.dp).rotate(gearRotation),
+						tint = MaterialTheme.colorScheme.primary
+					)
+				}
 			}
 		}
 		androidx.compose.animation.AnimatedVisibility(
