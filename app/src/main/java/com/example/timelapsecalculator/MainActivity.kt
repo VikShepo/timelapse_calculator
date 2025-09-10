@@ -558,6 +558,14 @@ fun TimelapseScreen(
 
 		Spacer(Modifier.height(16.dp))
 
+		// Localize placeholders and units for time fields
+		val hPh = if (language == Language.RU) "чч" else "hh"
+		val mPh = if (language == Language.RU) "мм" else "mm"
+		val sPh = if (language == Language.RU) "сс" else "ss"
+		val hUnit = if (language == Language.RU) "ч" else "h"
+		val mUnit = if (language == Language.RU) "мин" else "min"
+		val sUnit = if (language == Language.RU) "с" else "s"
+
 		when (selectedTab) {
 			Mode.Interval -> {
 				TimeInputRow(
@@ -569,6 +577,8 @@ fun TimelapseScreen(
 					onMChange = { closeDropdown(); videoM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 					onSChange = { closeDropdown(); videoS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 					onAnyFocus = { closeDropdown() },
+					hPlaceholder = hPh, mPlaceholder = mPh, sPlaceholder = sPh,
+					hUnit = hUnit, mUnit = mUnit, sUnit = sUnit,
 				)
 				Spacer(Modifier.height(12.dp))
 				TimeInputRow(
@@ -580,6 +590,8 @@ fun TimelapseScreen(
 					onMChange = { closeDropdown(); shootM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 					onSChange = { closeDropdown(); shootS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 					onAnyFocus = { closeDropdown() },
+					hPlaceholder = hPh, mPlaceholder = mPh, sPlaceholder = sPh,
+					hUnit = hUnit, mUnit = mUnit, sUnit = sUnit,
 				)
 			}
 			Mode.Video -> {
@@ -592,6 +604,8 @@ fun TimelapseScreen(
 					onMChange = { closeDropdown(); intervalM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 					onSChange = { closeDropdown(); intervalS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 					onAnyFocus = { closeDropdown() },
+					hPlaceholder = hPh, mPlaceholder = mPh, sPlaceholder = sPh,
+					hUnit = hUnit, mUnit = mUnit, sUnit = sUnit,
 				)
 				Spacer(Modifier.height(12.dp))
 				TimeInputRow(
@@ -603,6 +617,8 @@ fun TimelapseScreen(
 					onMChange = { closeDropdown(); shootM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 					onSChange = { closeDropdown(); shootS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 					onAnyFocus = { closeDropdown() },
+					hPlaceholder = hPh, mPlaceholder = mPh, sPlaceholder = sPh,
+					hUnit = hUnit, mUnit = mUnit, sUnit = sUnit,
 				)
 			}
 			Mode.Shoot -> {
@@ -615,6 +631,8 @@ fun TimelapseScreen(
 					onMChange = { closeDropdown(); intervalM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 					onSChange = { closeDropdown(); intervalS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 					onAnyFocus = { closeDropdown() },
+					hPlaceholder = hPh, mPlaceholder = mPh, sPlaceholder = sPh,
+					hUnit = hUnit, mUnit = mUnit, sUnit = sUnit,
 				)
 				Spacer(Modifier.height(12.dp))
 				TimeInputRow(
@@ -626,6 +644,8 @@ fun TimelapseScreen(
 					onMChange = { closeDropdown(); videoM = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 					onSChange = { closeDropdown(); videoS = it.filter { c -> c.isDigit() }; errorMessage = computeError() },
 					onAnyFocus = { closeDropdown() },
+					hPlaceholder = hPh, mPlaceholder = mPh, sPlaceholder = sPh,
+					hUnit = hUnit, mUnit = mUnit, sUnit = sUnit,
 				)
 			}
 		}
@@ -768,23 +788,29 @@ fun TimelapseScreen(
 @Composable
 private fun TimeInputRow(
 	label: String,
-	hText: String,
-	mText: String,
-	sText: String,
-	onHChange: (String) -> Unit,
-	onMChange: (String) -> Unit,
-	onSChange: (String) -> Unit,
-	onAnyFocus: () -> Unit = {},
+	 hText: String,
+	 mText: String,
+	 sText: String,
+	 onHChange: (String) -> Unit,
+	 onMChange: (String) -> Unit,
+	 onSChange: (String) -> Unit,
+	 onAnyFocus: () -> Unit = {},
+	 hPlaceholder: String,
+	 mPlaceholder: String,
+	 sPlaceholder: String,
+	 hUnit: String,
+	 mUnit: String,
+	 sUnit: String,
 ) {
 	Column(modifier = Modifier.fillMaxWidth()) {
-		Crossfade(targetState = label, animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing)) { text ->
+		Crossfade(targetState = label, animationSpec = tween(240, easing = LinearOutSlowInEasing)) { text ->
 			Text(text, color = MaterialTheme.colorScheme.onSurface)
 		}
 		Spacer(Modifier.height(6.dp))
 		Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-			UnitField(value = hText, onChange = onHChange, placeholder = "hh", unit = "h", modifier = Modifier.weight(1f), onFocus = onAnyFocus)
-			UnitField(value = mText, onChange = onMChange, placeholder = "mm", unit = "min", modifier = Modifier.weight(1f), onFocus = onAnyFocus)
-			UnitField(value = sText, onChange = onSChange, placeholder = "ss", unit = "s", modifier = Modifier.weight(1f), onFocus = onAnyFocus)
+			UnitField(value = hText, onChange = onHChange, placeholder = hPlaceholder, unit = hUnit, modifier = Modifier.weight(1f), onFocus = onAnyFocus)
+			UnitField(value = mText, onChange = onMChange, placeholder = mPlaceholder, unit = mUnit, modifier = Modifier.weight(1f), onFocus = onAnyFocus)
+			UnitField(value = sText, onChange = onSChange, placeholder = sPlaceholder, unit = sUnit, modifier = Modifier.weight(1f), onFocus = onAnyFocus)
 		}
 	}
 }
